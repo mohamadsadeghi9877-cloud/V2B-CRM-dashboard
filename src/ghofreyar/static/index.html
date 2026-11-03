@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سامانه هوشمند مدیریت ارتباط با مشتریان (CRM)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="booth-container">
+    <!-- Top Header -->
+    <header class="booth-header">
+      <div class="brand">
+        <div class="logo-icon">🏢</div>
+        <div>
+          <h1>سامانه هوشمند مدیریت ارتباط با مشتریان (CRM)</h1>
+        </div>
+      </div>
+      
+      <!-- Top Navigation Tabs -->
+      <div class="header-nav-tabs">
+        <button class="nav-tab-btn active" id="tabBtnCRM">
+          📊 داشبورد جامع CRM
+          <span class="badge badge-counter" id="navLeadsCount">۰</span>
+        </button>
+      </div>
+
+      <div class="header-actions">
+        <!-- CRM Quick Links -->
+      </div>
+    </header>
+
+    <!-- VIEW 1: AGENT & LIVE VOICE VIEW (HIDDEN) -->
+    <main class="booth-grid view-panel hidden" id="viewAgent" style="display: none !important;">
+      <!-- Left Column: Live Conversation & Audio Controls -->
+      <section class="conversation-panel">
+        <div class="panel-header">
+          <div class="title-with-badge">
+            <h2>رونویسی زنده گفتگو</h2>
+            <span class="badge" id="messageCountBadge">۱ پیام</span>
+          </div>
+          <div class="voice-mute-toggle-wrapper" title="فعال یا غیرفعال‌سازی پخش خودکار صدای مدل">
+            <label class="toggle-switch">
+              <input type="checkbox" id="autoVoiceToggle">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" id="autoVoiceLabel">🔇 پخش خودکار: خاموش</span>
+          </div>
+          <div id="offTopicIndicator" class="off-topic-badge hidden">
+            ⚠️ مکالمه خارج از موضوع یا شوخی
+          </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+          <!-- Messages will be injected here -->
+        </div>
+
+        <!-- Audio & Voice Control Bar -->
+        <div class="voice-controls">
+          <div class="recording-bar">
+            <button id="micBtn" class="mic-button" title="کلیک برای ضبط صدا">
+              <span class="mic-icon">🎤</span>
+              <span class="mic-wave"></span>
+            </button>
+            <div class="mic-status-label" id="micStatusText">برای صحبت با دستیار صوتی کلیک کنید</div>
+          </div>
+
+          <!-- Fallback Text Input for testing/noisy booth -->
+          <form id="textForm" class="text-fallback-form">
+            <input type="text" id="textInput" placeholder="یا پاسخ خود را اینجا تایپ کرده و Enter بزنید..." autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="sendBtn">ارسال</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-time Form Fields -->
+      <section class="form-panel">
+        <div class="panel-header">
+          <h2>فرم اطلاعات و درخواست پروژه</h2>
+          <span class="badge badge-success" id="completionRateBadge">۰٪ تکمیل شده</span>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Live Fields List with 2 Sections -->
+        <div class="fields-list">
+          <!-- Section 1: Contact Info -->
+          <div class="section-divider">
+            <span class="section-title">👤 اطلاعات فردی و تماس</span>
+          </div>
+
+          <!-- Full Name -->
+          <div class="field-card required" id="field-full_name">
+            <div class="field-header">
+              <span class="field-title">نام و نام خانوادگی</span>
+              <span class="field-tag required-tag">الزامی</span>
+            </div>
+            <input type="text" class="field-input" id="input-full_name" placeholder="در انتظار دریافت یا تایپ دستی...">
+          </div>
+
+          <!-- Phone Number -->
+          <div class="field-card required" id="field-phone_number">
+            <div class="field-header">
+              <span class="field-title">شماره همراه</span>
+              <span class="field-tag required-tag">الزامی</span>
+            </div>
+            <input type="text" class="field-input" id="input-phone_number" dir="ltr" placeholder="09xxxxxxxxx">
+          </div>
+
+          <!-- Email -->
+          <div class="field-card" id="field-email">
+            <div class="field-header">
+              <span class="field-title">ایمیل</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="email" class="field-input" id="input-email" dir="ltr" placeholder="example@domain.com">
+          </div>
+
+          <!-- Company Name -->
+          <div class="field-card" id="field-company_name">
+            <div class="field-header">
+              <span class="field-title">نام شرکت / سازمان</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="text" class="field-input" id="input-company_name" placeholder="نام سازمان یا برند">
+          </div>
+
+          <!-- Job Title -->
+          <div class="field-card" id="field-job_title">
+            <div class="field-header">
+              <span class="field-title">سمت شغلی</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="text" class="field-input" id="input-job_title" placeholder="سمت یا عنوان شغلی">
+          </div>
+
+          <!-- Section 2: Project & Commercial Inquiries -->
+          <div class="section-divider project-section">
+            <span class="section-title">💡 نیازمندی، درخواست پروژه و پیگیری</span>
+          </div>
+
+          <!-- Project Description -->
+          <div class="field-card highlight-card" id="field-project_description">
+            <div class="field-header">
+              <span class="field-title">شرح درخواست پروژه / نیاز</span>
+              <span class="field-tag project-tag">پروژه</span>
+            </div>
+            <textarea class="field-input field-textarea" id="input-project_description" rows="2" placeholder="شرح نیاز یا پروژه..."></textarea>
+          </div>
+
+          <!-- Field of Interest -->
+          <div class="field-card" id="field-field_of_interest">
+            <div class="field-header">
+              <span class="field-title">حوزه علاقه‌مندی / محصول</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="text" class="field-input" id="input-field_of_interest" placeholder="محصول یا خدمت درخواستی">
+          </div>
+
+          <!-- Estimated Budget -->
+          <div class="field-card" id="field-estimated_budget">
+            <div class="field-header">
+              <span class="field-title">بودجه تقریبی</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="text" class="field-input" id="input-estimated_budget" placeholder="بودجه تخمینی">
+          </div>
+
+          <!-- Timeline -->
+          <div class="field-card" id="field-timeline">
+            <div class="field-header">
+              <span class="field-title">بازه زمانی اجرا</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <input type="text" class="field-input" id="input-timeline" placeholder="مدت زمان یا بازه اجرا">
+          </div>
+
+          <!-- Additional Notes -->
+          <div class="field-card" id="field-notes">
+            <div class="field-header">
+              <span class="field-title">سایر یادداشت‌ها</span>
+              <span class="field-tag">اختیاری</span>
+            </div>
+            <textarea class="field-input field-textarea" id="input-notes" rows="2" placeholder="یادداشت‌های فنی یا بازرگانی..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="showSummaryBtn" class="btn btn-primary btn-block">
+            📋 مشاهده شناسنامه لید و ثبت نهایی در CRM
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- VIEW 2: DEDICATED CRM LEADS & PIPELINE DASHBOARD -->
+    <main class="crm-dashboard-view view-panel" id="viewCRM">
+      <!-- KPI Stats Cards -->
+      <section class="crm-stats-row">
+        <div class="crm-stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-info">
+            <span class="stat-label">کل سرنخ‌های ثبت‌شده</span>
+            <span class="stat-number" id="statTotalLeads">۰</span>
+          </div>
+        </div>
+
+        <div class="crm-stat-card hot-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-info">
+            <span class="stat-label">سرنخ‌های داغ (Hot)</span>
+            <span class="stat-number" id="statHotLeads">۰</span>
+          </div>
+        </div>
+
+        <div class="crm-stat-card inprogress-card">
+          <div class="stat-icon">📞</div>
+          <div class="stat-info">
+            <span class="stat-label">در حال پیگیری</span>
+            <span class="stat-number" id="statContactedLeads">۰</span>
+          </div>
+        </div>
+
+        <div class="crm-stat-card won-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-info">
+            <span class="stat-label">موفق / قرارداد (Won)</span>
+            <span class="stat-number" id="statWonLeads">۰</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRM Table & Quick Form -->
+      <section class="crm-content-layout">
+        <!-- Main Leads / Contacts / Companies Table Container -->
+        <div class="crm-table-container">
+          <!-- Sub-tabs to switch between the 3 CRM Tables -->
+          <div class="crm-sub-tabs">
+            <button class="crm-sub-tab active" id="subTabLeads">
+              <span>🎯</span> سرنخ‌ها و نیازها (Leads)
+            </button>
+            <button class="crm-sub-tab" id="subTabOpportunities">
+              <span>💼</span> فرصت‌های فروش (Opportunities)
+            </button>
+            <button class="crm-sub-tab" id="subTabContacts">
+              <span>👤</span> مخاطبان و افراد (Contacts)
+            </button>
+            <button class="crm-sub-tab" id="subTabCompanies">
+              <span>🏢</span> شرکت‌ها و سازمان‌ها (Companies)
+            </button>
+            <a href="/api/crm/export/all" target="_blank" class="btn-export-all-link" title="دانلود کل پایگاه‌داده CRM در یک فایل اکسل چندشیت">
+              📥 دانلود جامع کل CRM (همه شیت‌ها)
+            </a>
+          </div>
+
+          <!-- TABLE 1: LEADS -->
+          <div id="tableSectionLeads" class="crm-table-section">
+            <div class="crm-table-header">
+              <div class="table-title-area">
+                <h3>جدول سرنخ‌های تجاری (Leads)</h3>
+                <span class="subtitle-text">فهرست درخواست‌ها، پروژه‌ها و وضعیت پیگیری فروش</span>
+              </div>
+              
+              <div class="table-filters">
+                <select id="filterTemperature" class="crm-select">
+                  <option value="">همه اولویت‌ها (داغ/گرم/سرد)</option>
+                  <option value="Hot">🔥 داغ (Hot)</option>
+                  <option value="Warm">⚡ گرم (Warm)</option>
+                  <option value="Cold">❄️ سرد (Cold)</option>
+                </select>
+
+                <select id="filterStatus" class="crm-select">
+                  <option value="">همه وضعیت‌ها</option>
+                  <option value="New">جدید (New)</option>
+                  <option value="In_Progress">در حال ارزیابی / تماس</option>
+                  <option value="Converted">تبدیل شده به فرصت ✨</option>
+                  <option value="Disqualified">رد شده / غیرمرتبط</option>
+                </select>
+
+                <button class="btn btn-secondary btn-sm" id="btnRefreshLeads">🔄 به‌روزرسانی</button>
+                <a href="/api/crm/export/leads" target="_blank" class="btn btn-secondary btn-sm" title="دانلود فایل اکسل سرنخ‌ها" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📗 خروجی اکسل</a>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddLeadModal">➕ سرنخ جدید</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="crm-leads-table">
+                <thead>
+                  <tr>
+                    <th>ردیف</th>
+                    <th>نام مخاطب</th>
+                    <th>شرکت / سازمان</th>
+                    <th>شماره تماس</th>
+                    <th>عنوان پروژه / نیاز</th>
+                    <th>بودجه</th>
+                    <th>اولویت</th>
+                    <th>وضعیت پیگیری</th>
+                    <th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody id="crmLeadsTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TABLE 2: CONTACTS -->
+          <div id="tableSectionContacts" class="crm-table-section hidden">
+            <div class="crm-table-header">
+              <div class="table-title-area">
+                <h3>جدول اشخاص و مخاطبان (Contacts)</h3>
+                <span class="subtitle-text">فهرست افراد ثبت‌شده، سمت سازمانی و راه‌های ارتباطی</span>
+              </div>
+              <div class="table-filters">
+                <button class="btn btn-secondary btn-sm" id="btnRefreshContacts">🔄 به‌روزرسانی مخاطبان</button>
+                <a href="/api/crm/export/contacts" target="_blank" class="btn btn-secondary btn-sm" title="دانلود فایل اکسل مخاطبان" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📗 خروجی اکسل</a>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddContactModal">➕ مخاطب جدید</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="crm-leads-table">
+                <thead>
+                  <tr>
+                    <th>ردیف</th>
+                    <th>نام و نام خانوادگی</th>
+                    <th>سمت سازمانی</th>
+                    <th>شرکت متصل</th>
+                    <th>شماره همراه</th>
+                    <th>ایمیل</th>
+                    <th>تاریخ ثبت</th>
+                    <th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody id="crmContactsTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TABLE 3: COMPANIES -->
+          <div id="tableSectionCompanies" class="crm-table-section hidden">
+            <div class="crm-table-header">
+              <div class="table-title-area">
+                <h3>جدول شرکت‌ها و سازمان‌ها (Companies)</h3>
+                <span class="subtitle-text">فهرست پایگاه داده شرکت‌ها، حوزه فعالیت و اطلاعات ثبتی</span>
+              </div>
+              <div class="table-filters">
+                <button class="btn btn-secondary btn-sm" id="btnRefreshCompanies">🔄 به‌روزرسانی شرکت‌ها</button>
+                <a href="/api/crm/export/companies" target="_blank" class="btn btn-secondary btn-sm" title="دانلود فایل اکسل شرکت‌ها" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📗 خروجی اکسل</a>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddCompanyModal">➕ شرکت جدید</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="crm-leads-table">
+                <thead>
+                  <tr>
+                    <th>ردیف</th>
+                    <th>نام شرکت / سازمان</th>
+                    <th>حوزه فعالیت / صنعت</th>
+                    <th>شماره تماس شرکت</th>
+                    <th>وب‌سایت</th>
+                    <th>آدرس / توضیحات</th>
+                    <th>تاریخ ایجاد</th>
+                    <th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody id="crmCompaniesTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TABLE 4: OPPORTUNITIES (PIPELINE) -->
+          <div id="tableSectionOpportunities" class="crm-table-section hidden">
+            <!-- Opportunities Pipeline KPI Cards -->
+            <div class="opp-kpi-grid">
+              <div class="opp-kpi-card">
+                <span class="opp-kpi-label">📊 ارزش کل پایپ‌لاین (همه فرصت‌ها)</span>
+                <span class="opp-kpi-val" id="oppKpiTotalAmount">۰ تومان</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);"><span id="oppKpiTotalCount">۰</span> فرصت ثبت شده</span>
+              </div>
+              <div class="opp-kpi-card" style="border-right: 3px solid #38bdf8;">
+                <span class="opp-kpi-label">⚡ فرصت‌های فعال و در جریان</span>
+                <span class="opp-kpi-val" id="oppKpiOpenAmount" style="color: #38bdf8;">۰ تومان</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);"><span id="oppKpiOpenCount">۰</span> معامله در حال مذاکره</span>
+              </div>
+              <div class="opp-kpi-card" style="border-right: 3px solid #10b981;">
+                <span class="opp-kpi-label">🏆 قراردادهای موفق (Closed Won)</span>
+                <span class="opp-kpi-val" id="oppKpiWonAmount" style="color: #10b981;">۰ تومان</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);"><span id="oppKpiWonCount">۰</span> معامله برنده شده</span>
+              </div>
+              <div class="opp-kpi-card" style="border-right: 3px solid #a855f7;">
+                <span class="opp-kpi-label">🎯 نرخ تبدیل و موفقیت (Win Rate)</span>
+                <span class="opp-kpi-val" id="oppKpiWinRate" style="color: #c084fc;">۰٪</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">نسبت موفقیت به کل معاملات نهایی</span>
+              </div>
+            </div>
+
+            <div class="crm-table-header">
+              <div class="table-title-area">
+                <h3>💼 جدول فرصت‌های تجاری و فروش (Opportunities)</h3>
+                <span class="subtitle-text">پایپ‌لاین مدیریت معاملات، مراحل فروش، احتمالات موفقیت و مبالغ قرارداد</span>
+              </div>
+              
+              <div class="table-filters">
+                <select id="filterOppStage" class="crm-select">
+                  <option value="">همه مراحل فروش (Stage)</option>
+                  <option value="Requirement_Analysis">🔍 نیازسنجی و بررسی فنی (۲۰٪)</option>
+                  <option value="Proposal">📑 ارائه پروپوزال و پیش‌فاکتور (۵۰٪)</option>
+                  <option value="Negotiation">🤝 مذاکره نهایی و قیمت (۸۰٪)</option>
+                  <option value="Closed_Won">🏆 بسته شده - موفق / عقد قرارداد (۱۰۰٪)</option>
+                  <option value="Closed_Lost">❌ بسته شده - ناموفق / رد پیشنهاد (۰٪)</option>
+                </select>
+
+                <button class="btn btn-secondary btn-sm" id="btnRefreshOpportunities">🔄 به‌روزرسانی</button>
+                <a href="/api/crm/export/opportunities" target="_blank" class="btn btn-secondary btn-sm" title="دانلود فایل اکسل فرصت‌ها" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📗 خروجی اکسل</a>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddOppModal">➕ فرصت جدید</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="crm-leads-table">
+                <thead>
+                  <tr>
+                    <th>ردیف</th>
+                    <th>عنوان فرصت فروش</th>
+                    <th>شرکت / سازمان</th>
+                    <th>شخص مخاطب</th>
+                    <th>مبلغ برآوردی</th>
+                    <th>مرحله فروش (Stage)</th>
+                    <th>احتمال موفقیت</th>
+                    <th>سرنخ مبدا</th>
+                    <th>تاریخ موعد</th>
+                    <th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody id="crmOpportunitiesTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar: Quick Lead Add Form -->
+        <div class="crm-quick-form-card">
+          <h3>⚡ ثبت سریع لید نمایشگاهی</h3>
+          <p class="quick-form-desc">ثبت فوری کارت ویزیت یا مذاکره حضوری غرفه</p>
+
+          <form id="crmQuickCaptureForm" class="crm-form">
+            <div class="form-group">
+              <label>نام و نام خانوادگی <span class="req">*</span></label>
+              <input type="text" id="quickFullName" required placeholder="مثال: مهندس راد">
+            </div>
+
+            <div class="form-group">
+              <label>شماره تماس <span class="req">*</span></label>
+              <input type="text" id="quickPhone" required placeholder="مثال: 09121234567">
+            </div>
+
+            <div class="form-group">
+              <label>نام شرکت / سازمان</label>
+              <input type="text" id="quickCompany" placeholder="مثال: پتروشیمی زاگرس">
+            </div>
+
+            <div class="form-group">
+              <label>سمت شغلی</label>
+              <input type="text" id="quickJobTitle" placeholder="مثال: مدیر فناوری اطلاعات">
+            </div>
+
+            <div class="form-group">
+              <label>عنوان پروژه / نیاز <span style="font-size:0.75rem; color: var(--text-muted);">(اختیاری)</span></label>
+              <input type="text" id="quickProjectTitle" placeholder="اختیاری - در صورت وجود شرح پروژه">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>بودجه تخمینی</label>
+                <input type="text" id="quickBudget" placeholder="مثال: ۸۰ میلیون">
+              </div>
+
+              <div class="form-group half">
+                <label>اولویت خرید</label>
+                <select id="quickTemp">
+                  <option value="Hot">🔥 داغ</option>
+                  <option value="Warm" selected>⚡ گرم</option>
+                  <option value="Cold">❄️ سرد</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>یادداشت پیگیری</label>
+              <textarea id="quickNotes" rows="2" placeholder="نکات مهم مذاکره..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btnSubmitQuickLead">
+              💾 ذخیره در دیتابیس CRM
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Confirmation & Lead Summary Modal -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>شناسنامه لید و ثبت در CRM غرفه</h3>
+          <button class="modal-close-btn" id="closeModalBtn">×</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="modal-section-title">اطلاعات مخاطب و سازمان</div>
+          <div class="lead-summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">نام و نام خانوادگی:</span>
+              <span class="summary-value" id="sum-full_name">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">شماره تماس:</span>
+              <span class="summary-value" id="sum-phone_number">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">ایمیل:</span>
+              <span class="summary-value" id="sum-email">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">شرکت / سازمان:</span>
+              <span class="summary-value" id="sum-company_name">—</span>
+            </div>
+            <div class="summary-item full-width">
+              <span class="summary-label">سمت شغلی:</span>
+              <span class="summary-value" id="sum-job_title">—</span>
+            </div>
+          </div>
+
+          <div class="modal-section-title">نیازمندی و جزئیات پروژه</div>
+          <div class="lead-summary-grid project-summary-grid">
+            <div class="summary-item full-width">
+              <span class="summary-label">شرح پروژه / نیاز درخواستی:</span>
+              <span class="summary-value highlight-value" id="sum-project_description">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">حوزه علاقه‌مندی:</span>
+              <span class="summary-value" id="sum-field_of_interest">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">بودجه تقریبی:</span>
+              <span class="summary-value" id="sum-estimated_budget">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">بازه زمانی:</span>
+              <span class="summary-value" id="sum-timeline">—</span>
+            </div>
+            <div class="summary-item full-width">
+              <span class="summary-label">سایر نکات پیگیری:</span>
+              <span class="summary-value" id="sum-notes">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="copyLeadBtn">📋 کپی مشخصات</button>
+          <button class="btn btn-success" id="confirmLeadBtn">✅ ذخیره در سامانه CRM غرفه</button>
+          <button class="btn btn-secondary" id="newVisitorFromModalBtn">🔄 مشتری جدید (خالی کردن فرم)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 1: ADD COMPANY -->
+    <div id="modalAddCompany" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3>🏢 افزودن شرکت / سازمان جدید</h3>
+          <button class="modal-close-btn" id="btnCloseAddCompanyModal">×</button>
+        </div>
+        <form id="formAddCompany">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>نام شرکت یا برند تجاری <span class="req">*</span></label>
+              <input type="text" id="compName" required placeholder="مثال: شرکت داده‌پردازی خوارزمی">
+            </div>
+            <div class="form-group">
+              <label>حوزه فعالیت / صنعت</label>
+              <input type="text" id="compIndustry" placeholder="مثال: فناوری اطلاعات، نفت و گاز، فولاد...">
+            </div>
+            <div class="form-group">
+              <label>تلفن دفتر مرکزی / شرکت</label>
+              <input type="text" id="compPhone" placeholder="مثال: 02188889999">
+            </div>
+            <div class="form-group">
+              <label>آدرس وب‌سایت</label>
+              <input type="text" id="compWebsite" placeholder="مثال: https://example.ir">
+            </div>
+            <div class="form-group">
+              <label>آدرس و توضیحات تکمیلی</label>
+              <textarea id="compAddress" rows="2" placeholder="تهران، خیابان ولیعصر..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelAddCompany">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ثبت شرکت در CRM</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 2: ADD CONTACT -->
+    <div id="modalAddContact" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+          <h3>👤 افزودن شخص و مخاطب جدید</h3>
+          <button class="modal-close-btn" id="btnCloseAddContactModal">×</button>
+        </div>
+        <form id="formAddContact">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>نام و نام خانوادگی <span class="req">*</span></label>
+              <input type="text" id="contactFullName" required placeholder="مثال: دکتر علیرضا نادری">
+            </div>
+            <div class="form-group">
+              <label>شماره تماس / همراه <span class="req">*</span></label>
+              <input type="text" id="contactPhone" required placeholder="مثال: 09121112233">
+            </div>
+            <div class="form-group">
+              <label>شرکت متصل (اختیاری)</label>
+              <input type="text" id="searchCompanyInput" placeholder="🔍 جستجوی سریع نام شرکت..." style="margin-bottom: 0.4rem; font-size: 0.82rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+              <select id="contactCompanySelect" class="crm-select" style="width: 100%;">
+                <option value="">— شخص حقیقی (بدون شرکت) —</option>
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>سمت شغلی / عنوان سازمانی</label>
+              <input type="text" id="contactJobTitle" placeholder="مثال: مدیر بازرگانی، کارشناس فنی...">
+            </div>
+            <div class="form-group">
+              <label>آدرس ایمیل</label>
+              <input type="email" id="contactEmail" placeholder="مثال: user@domain.com">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelAddContact">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ثبت مخاطب در CRM</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 3: ADD LEAD -->
+    <div id="modalAddLead" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 550px;">
+        <div class="modal-header">
+          <h3>🎯 افزودن سرنخ / نیاز تجاری جدید</h3>
+          <button class="modal-close-btn" id="btnCloseAddLeadModal">×</button>
+        </div>
+        <form id="formAddLead">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>مخاطب صاحب سرنخ <span class="req">*</span></label>
+              <input type="text" id="searchContactInput" placeholder="🔍 جستجوی نام، شرکت یا شماره مخاطب..." style="margin-bottom: 0.4rem; font-size: 0.82rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+              <select id="leadContactSelect" class="crm-select" style="width: 100%;" required>
+                <option value="">— لطفاً مخاطب را انتخاب کنید —</option>
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>عنوان نیاز یا فرصت تجاری <span style="font-size:0.75rem; color: var(--text-muted);">(اختیاری)</span></label>
+              <input type="text" id="leadTitleInput" placeholder="اختیاری - در صورت وجود شرح یا عنوان نیاز">
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label>بودجه تخمینی</label>
+                <input type="text" id="leadBudgetInput" placeholder="مثال: ۱۲۰ میلیون">
+              </div>
+              <div class="form-group half">
+                <label>میزان حرارت (اولویت)</label>
+                <select id="leadTempSelect" class="crm-select" style="width: 100%;">
+                  <option value="Hot">🔥 داغ (Hot)</option>
+                  <option value="Warm" selected>⚡ گرم (Warm)</option>
+                  <option value="Cold">❄️ سرد (Cold)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>حوزه علاقه‌مندی / محصول</label>
+              <input type="text" id="leadFieldInput" placeholder="مثال: پلتفرم ERP، اتوماسیون اداری...">
+            </div>
+            <div class="form-group">
+              <label>یادداشت پیگیری / جزئیات</label>
+              <textarea id="leadNotesInput" rows="2" placeholder="توضیحات تکمیلی پیرامون فرصت تجاری..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelAddLead">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ثبت سرنخ در CRM</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 4: EDIT COMPANY -->
+    <div id="modalEditCompany" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3>✏️ ویرایش مشخصات شرکت</h3>
+          <button class="modal-close-btn" id="btnCloseEditCompanyModal">×</button>
+        </div>
+        <form id="formEditCompany">
+          <input type="hidden" id="editCompId">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>نام شرکت یا برند تجاری <span class="req">*</span></label>
+              <input type="text" id="editCompName" required>
+            </div>
+            <div class="form-group">
+              <label>حوزه فعالیت / صنعت</label>
+              <input type="text" id="editCompIndustry">
+            </div>
+            <div class="form-group">
+              <label>تلفن شرکت</label>
+              <input type="text" id="editCompPhone">
+            </div>
+            <div class="form-group">
+              <label>آدرس وب‌سایت</label>
+              <input type="text" id="editCompWebsite">
+            </div>
+            <div class="form-group">
+              <label>آدرس و توضیحات</label>
+              <textarea id="editCompAddress" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelEditCompany">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 5: EDIT CONTACT -->
+    <div id="modalEditContact" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+          <h3>✏️ ویرایش مشخصات مخاطب</h3>
+          <button class="modal-close-btn" id="btnCloseEditContactModal">×</button>
+        </div>
+        <form id="formEditContact">
+          <input type="hidden" id="editContactId">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>نام و نام خانوادگی <span class="req">*</span></label>
+              <input type="text" id="editContactFullName" required>
+            </div>
+            <div class="form-group">
+              <label>شماره تماس / همراه <span class="req">*</span></label>
+              <input type="text" id="editContactPhone" required>
+            </div>
+            <div class="form-group">
+              <label>شرکت متصل</label>
+              <input type="text" id="editSearchCompanyInput" placeholder="🔍 جستجوی سریع نام شرکت..." style="margin-bottom: 0.4rem; font-size: 0.82rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+              <select id="editContactCompanySelect" class="crm-select" style="width: 100%;">
+                <option value="">— شخص حقیقی (بدون شرکت) —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>سمت شغلی</label>
+              <input type="text" id="editContactJobTitle">
+            </div>
+            <div class="form-group">
+              <label>آدرس ایمیل</label>
+              <input type="email" id="editContactEmail">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelEditContact">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 6: EDIT LEAD -->
+    <div id="modalEditLead" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 550px;">
+        <div class="modal-header">
+          <h3>✏️ ویرایش سرنخ و نیاز تجاری</h3>
+          <button class="modal-close-btn" id="btnCloseEditLeadModal">×</button>
+        </div>
+        <form id="formEditLead">
+          <input type="hidden" id="editLeadId">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="form-group">
+              <label>مخاطب صاحب سرنخ <span class="req">*</span></label>
+              <input type="text" id="editSearchContactInput" placeholder="🔍 جستجوی سریع مخاطب..." style="margin-bottom: 0.4rem; font-size: 0.82rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+              <select id="editLeadContactSelect" class="crm-select" style="width: 100%;" required>
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>عنوان نیاز یا فرصت تجاری</label>
+              <input type="text" id="editLeadTitleInput">
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label>بودجه تخمینی</label>
+                <input type="text" id="editLeadBudgetInput">
+              </div>
+              <div class="form-group half">
+                <label>میزان حرارت</label>
+                <select id="editLeadTempSelect" class="crm-select" style="width: 100%;">
+                  <option value="Hot">🔥 داغ (Hot)</option>
+                  <option value="Warm">⚡ گرم (Warm)</option>
+                  <option value="Cold">❄️ سرد (Cold)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>وضعیت پیگیری</label>
+              <select id="editLeadStatusSelect" class="crm-select" style="width: 100%;">
+                <option value="New">جدید (New)</option>
+                <option value="In_Progress">در حال ارزیابی / تماس</option>
+                <option value="Converted">تبدیل شده به فرصت ✨</option>
+                <option value="Disqualified">رد شده / غیرمرتبط</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>حوزه علاقه‌مندی / محصول</label>
+              <input type="text" id="editLeadFieldInput">
+            </div>
+            <div class="form-group">
+              <label>یادداشت پیگیری</label>
+              <textarea id="editLeadNotesInput" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelEditLead">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 7: CONVERT LEAD TO OPPORTUNITY -->
+    <div id="modalConvertLead" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 560px;">
+        <div class="modal-header">
+          <h3>💼 تبدیل سرنخ به فرصت تجاری (Convert to Opportunity)</h3>
+          <button class="modal-close-btn" id="btnCloseConvertLeadModal">×</button>
+        </div>
+        <form id="formConvertLead">
+          <input type="hidden" id="convLeadId">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <!-- Lead Preview Card -->
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 0.6rem; padding: 0.75rem 1rem; font-size: 0.85rem;">
+              <div style="font-weight: 700; color: #10b981; margin-bottom: 0.35rem;">🎯 مشخصات لید انتخاب‌شده:</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; color: var(--text-secondary); font-size: 0.82rem;">
+                <div>مخاطب: <strong id="convLeadContactTxt" style="color: var(--text-primary);">—</strong></div>
+                <div>شرکت: <strong id="convLeadCompanyTxt" style="color: var(--text-primary);">—</strong></div>
+                <div style="grid-column: span 2;">بودجه تقریبی اعلامی: <strong id="convLeadBudgetTxt" style="color: #38bdf8;">—</strong></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>عنوان معامله / فرصت تجاری <span class="req">*</span></label>
+              <input type="text" id="convOppTitle" required placeholder="مثال: قرارداد تأمین سامانه هوشمند">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>مبلغ برآوردی معامله (تومان)</label>
+                <input type="number" id="convOppAmount" placeholder="مثال: 85000000" min="0" step="1000000">
+              </div>
+              <div class="form-group half">
+                <label>مرحله فعلی در پایپ‌لاین</label>
+                <select id="convOppStage" class="crm-select" style="width: 100%;">
+                  <option value="Requirement_Analysis" selected>🔍 نیازسنجی و بررسی فنی (۲۰٪)</option>
+                  <option value="Proposal">📑 ارائه پروپوزال و پیش‌فاکتور (۵۰٪)</option>
+                  <option value="Negotiation">🤝 مذاکره نهایی و قیمت (۸۰٪)</option>
+                  <option value="Closed_Won">🏆 بسته شده - موفق / عقد قرارداد (۱۰۰٪)</option>
+                  <option value="Closed_Lost">❌ بسته شده - ناموفق / رد پیشنهاد (۰٪)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>احتمال موفقیت (%)</label>
+                <input type="number" id="convOppProbability" min="0" max="100" value="30">
+              </div>
+              <div class="form-group half">
+                <label>تاریخ پیش‌بینی توافق</label>
+                <input type="text" id="convOppCloseDate" placeholder="مثال: ۱۴۰۵/۰۲/۱۵ یا اردیبهشت">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>اولویت معامله</label>
+                <select id="convOppPriority" class="crm-select" style="width: 100%;">
+                  <option value="High">🔴 بالا (High)</option>
+                  <option value="Medium" selected>🟡 متوسط (Medium)</option>
+                  <option value="Low">🟢 پایین (Low)</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>نوع معامله</label>
+                <select id="convOppDealType" class="crm-select" style="width: 100%;">
+                  <option value="New Business" selected>مشتری / قرارداد جدید</option>
+                  <option value="Existing Business">مشتری فعلی (توسعه)</option>
+                  <option value="Upgrade">ارتقا / تمدید سرویس</option>
+                  <option value="Partner">همکاری تجاری / پارتنر</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>استراتژی و نکات مذاکره</label>
+              <textarea id="convOppNotes" rows="2" placeholder="برنامه گام‌های بعدی، تخفیف، افراد تصمیم‌گیرنده..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelConvertLead">انصراف</button>
+            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #059669, #10b981);">💼 ایجاد فرصت فروش</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 8: ADD OPPORTUNITY DIRECTLY -->
+    <div id="modalAddOpportunity" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 560px;">
+        <div class="modal-header">
+          <h3>💼 ثبت مستقیم فرصت تجاری (New Opportunity)</h3>
+          <button class="modal-close-btn" id="btnCloseAddOppModal">×</button>
+        </div>
+        <form id="formAddOpportunity">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div class="form-group">
+              <label>عنوان فرصت فروش <span class="req">*</span></label>
+              <input type="text" id="oppTitle" required placeholder="مثال: قرارداد هوشمندسازی خط تولید">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>شرکت متصل (اختیاری)</label>
+                <input type="text" id="searchOppCompanyInput" placeholder="🔍 جستجوی شرکت..." style="margin-bottom: 0.35rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+                <select id="oppCompanySelect" class="crm-select" style="width: 100%;">
+                  <option value="">— بدون شرکت —</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>مخاطب صاحب معامله</label>
+                <input type="text" id="searchOppContactInput" placeholder="🔍 جستجوی مخاطب..." style="margin-bottom: 0.35rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+                <select id="oppContactSelect" class="crm-select" style="width: 100%;">
+                  <option value="">— بدون مخاطب اختصاصی —</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>مبلغ برآوردی (تومان)</label>
+                <input type="number" id="oppAmount" placeholder="مثال: 50000000" min="0" step="1000000">
+              </div>
+              <div class="form-group half">
+                <label>مرحله فروش (Stage)</label>
+                <select id="oppStage" class="crm-select" style="width: 100%;">
+                  <option value="Requirement_Analysis" selected>🔍 نیازسنجی و بررسی فنی (۲۰٪)</option>
+                  <option value="Proposal">📑 ارائه پروپوزال و پیش‌فاکتور (۵۰٪)</option>
+                  <option value="Negotiation">🤝 مذاکره نهایی و قیمت (۸۰٪)</option>
+                  <option value="Closed_Won">🏆 بسته شده - موفق / عقد قرارداد (۱۰۰٪)</option>
+                  <option value="Closed_Lost">❌ بسته شده - ناموفق / رد پیشنهاد (۰٪)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>احتمال موفقیت (%)</label>
+                <input type="number" id="oppProbability" min="0" max="100" value="10">
+              </div>
+              <div class="form-group half">
+                <label>تاریخ پیش‌بینی توافق</label>
+                <input type="text" id="oppCloseDate" placeholder="مثال: ۱۴۰۵/۰۱/۳۰">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>اولویت معامله</label>
+                <select id="oppPriority" class="crm-select" style="width: 100%;">
+                  <option value="High">🔴 بالا (High)</option>
+                  <option value="Medium" selected>🟡 متوسط (Medium)</option>
+                  <option value="Low">🟢 پایین (Low)</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>نوع معامله</label>
+                <select id="oppDealType" class="crm-select" style="width: 100%;">
+                  <option value="New Business" selected>مشتری جدید (New)</option>
+                  <option value="Existing Business">مشتری قبلی (Existing)</option>
+                  <option value="Upgrade">ارتقای سطح سرویس</option>
+                  <option value="Partner">همکاری شرکتی</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>یادداشت‌ها و توضیحات مذاکره</label>
+              <textarea id="oppNotes" rows="2" placeholder="جزئیات مذاکرات یا الزامات قرارداد..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelAddOpp">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ثبت فرصت فروش</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 9: EDIT OPPORTUNITY -->
+    <div id="modalEditOpportunity" class="modal-overlay hidden">
+      <div class="modal-content" style="max-width: 560px;">
+        <div class="modal-header">
+          <h3>✏️ ویرایش فرصت تجاری و فروش</h3>
+          <button class="modal-close-btn" id="btnCloseEditOppModal">×</button>
+        </div>
+        <form id="formEditOpportunity">
+          <input type="hidden" id="editOppId">
+          <div class="modal-body" style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div class="form-group">
+              <label>عنوان فرصت فروش <span class="req">*</span></label>
+              <input type="text" id="editOppTitle" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>شرکت متصل</label>
+                <input type="text" id="editSearchOppCompanyInput" placeholder="🔍 جستجوی شرکت..." style="margin-bottom: 0.35rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+                <select id="editOppCompanySelect" class="crm-select" style="width: 100%;">
+                  <option value="">— بدون شرکت —</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>مخاطب صاحب معامله</label>
+                <input type="text" id="editSearchOppContactInput" placeholder="🔍 جستجوی مخاطب..." style="margin-bottom: 0.35rem; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%;">
+                <select id="editOppContactSelect" class="crm-select" style="width: 100%;">
+                  <option value="">— بدون مخاطب اختصاصی —</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>مبلغ برآوردی (تومان)</label>
+                <input type="number" id="editOppAmount" min="0" step="1000000">
+              </div>
+              <div class="form-group half">
+                <label>مرحله فروش (Stage)</label>
+                <select id="editOppStage" class="crm-select" style="width: 100%;">
+                  <option value="Requirement_Analysis">🔍 نیازسنجی و بررسی فنی (۲۰٪)</option>
+                  <option value="Proposal">📑 ارائه پروپوزال و پیش‌فاکتور (۵۰٪)</option>
+                  <option value="Negotiation">🤝 مذاکره نهایی و قیمت (۸۰٪)</option>
+                  <option value="Closed_Won">🏆 بسته شده - موفق / عقد قرارداد (۱۰۰٪)</option>
+                  <option value="Closed_Lost">❌ بسته شده - ناموفق / رد پیشنهاد (۰٪)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>احتمال موفقیت (%)</label>
+                <input type="number" id="editOppProbability" min="0" max="100">
+              </div>
+              <div class="form-group half">
+                <label>تاریخ پیش‌بینی توافق</label>
+                <input type="text" id="editOppCloseDate">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>اولویت معامله</label>
+                <select id="editOppPriority" class="crm-select" style="width: 100%;">
+                  <option value="High">🔴 بالا (High)</option>
+                  <option value="Medium">🟡 متوسط (Medium)</option>
+                  <option value="Low">🟢 پایین (Low)</option>
+                </select>
+              </div>
+              <div class="form-group half">
+                <label>نوع معامله</label>
+                <select id="editOppDealType" class="crm-select" style="width: 100%;">
+                  <option value="New Business">مشتری جدید (New)</option>
+                  <option value="Existing Business">مشتری قبلی (Existing)</option>
+                  <option value="Upgrade">ارتقای سطح سرویس</option>
+                  <option value="Partner">همکاری شرکتی</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>یادداشت‌ها و توضیحات مذاکره</label>
+              <textarea id="editOppNotes" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelEditOpp">انصراف</button>
+            <button type="submit" class="btn btn-primary">💾 ذخیره تغییرات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <audio id="ttsAudioPlayer" style="display: none;"></audio>
+  <script src="app.js"></script>
+</body>
+</html>

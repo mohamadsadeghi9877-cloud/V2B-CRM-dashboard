@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>غرفه‌یار — دستیار صوتی هوشمند نمایشگاه</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="booth-container">
+    <!-- Top Header -->
+    <header class="booth-header">
+      <div class="brand">
+        <div class="logo-icon">🎙️</div>
+        <div>
+          <h1>غرفه‌یار هوشمند</h1>
+          <span class="subtitle">دستیار صوتی نمایشگاه | مغز پردازش: Qwen 3.5 4B (Unsloth GGUF) | تبدیل صوت: Diba-STT & Mana-Piper</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-badge" id="systemStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">سیستم آماده گفتگو و ثبت لید</span>
+        </div>
+        <button id="resetBtn" class="btn btn-secondary" title="شروع مکالمه با بازدیدکننده جدید">
+          🔄 بازدیدکننده جدید
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Booth Display Grid -->
+    <main class="booth-grid">
+      <!-- Left Column: Live Conversation & Audio Controls -->
+      <section class="conversation-panel">
+        <div class="panel-header">
+          <div class="title-with-badge">
+            <h2>رونویسی زنده گفتگو</h2>
+            <span class="badge" id="messageCountBadge">۱ پیام</span>
+          </div>
+          <div id="offTopicIndicator" class="off-topic-badge hidden">
+            ⚠️ مکالمه خارج از موضوع یا شوخی
+          </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+          <!-- Messages will be injected here -->
+        </div>
+
+        <!-- Audio & Voice Control Bar -->
+        <div class="voice-controls">
+          <div class="recording-bar">
+            <button id="micBtn" class="mic-button" title="کلیک برای ضبط صدا">
+              <span class="mic-icon">🎤</span>
+              <span class="mic-wave"></span>
+            </button>
+            <div class="mic-status-label" id="micStatusText">برای صحبت با غرفه‌یار کلیک کنید</div>
+          </div>
+
+          <!-- Fallback Text Input for testing/noisy booth -->
+          <form id="textForm" class="text-fallback-form">
+            <input type="text" id="textInput" placeholder="یا پاسخ خود را اینجا تایپ کرده و Enter بزنید..." autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="sendBtn">ارسال</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right Column: Real-time Form Fields -->
+      <section class="form-panel">
+        <div class="panel-header">
+          <h2>فرم اطلاعات و درخواست پروژه</h2>
+          <span class="badge badge-success" id="completionRateBadge">۰٪ تکمیل شده</span>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Live Fields List with 2 Sections -->
+        <div class="fields-list">
+          <!-- Section 1: Contact Info -->
+          <div class="section-divider">
+            <span class="section-title">👤 اطلاعات فردی و تماس</span>
+          </div>
+
+          <!-- Full Name -->
+          <div class="field-card required" id="field-full_name">
+            <div class="field-header">
+              <span class="field-title">نام و نام خانوادگی</span>
+              <span class="field-tag required-tag">الزامی</span>
+            </div>
+            <div class="field-value empty" id="val-full_name">در انتظار دریافت...</div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="field-card required" id="field-phone_number">
+            <div class="field-header">
+              <span class="field-title">📱 شماره تماس</span>
+              <span class="field-tag required-tag">الزامی</span>
+            </div>
+            <div class="field-value empty" id="val-phone_number">در انتظار دریافت...</div>
+          </div>
+
+          <!-- Email -->
+          <div class="field-card" id="field-email">
+            <div class="field-header">
+              <span class="field-title">✉️ آدرس ایمیل</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-email">—</div>
+          </div>
+
+          <!-- Company Name -->
+          <div class="field-card" id="field-company_name">
+            <div class="field-header">
+              <span class="field-title">🏢 نام شرکت / سازمان</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-company_name">—</div>
+          </div>
+
+          <!-- Job Title -->
+          <div class="field-card" id="field-job_title">
+            <div class="field-header">
+              <span class="field-title">💼 سمت شغلی</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-job_title">—</div>
+          </div>
+
+          <!-- Section 2: Project Inquiries & Business Insights -->
+          <div class="section-divider project-divider">
+            <span class="section-title">🚀 نیازمندی، درخواست پروژه و پیگیری</span>
+            <span class="field-tag business-tag">فرصت تجاری</span>
+          </div>
+
+          <!-- Project Description -->
+          <div class="field-card project-card" id="field-project_description">
+            <div class="field-header">
+              <span class="field-title">💡 شرح درخواست یا ایده پروژه</span>
+              <span class="field-tag business-tag">مهم</span>
+            </div>
+            <div class="field-value empty" id="val-project_description">هنوز درخواستی مطرح نشده است...</div>
+          </div>
+
+          <!-- Field of Interest -->
+          <div class="field-card" id="field-field_of_interest">
+            <div class="field-header">
+              <span class="field-title">🎯 حوزه علاقه‌مندی یا خدمات مورد نظر</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-field_of_interest">—</div>
+          </div>
+
+          <!-- Estimated Budget -->
+          <div class="field-card" id="field-estimated_budget">
+            <div class="field-header">
+              <span class="field-title">💰 بودجه تقریبی</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-estimated_budget">—</div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="field-card" id="field-timeline">
+            <div class="field-header">
+              <span class="field-title">⏱️ بازه زمانی / فوریت اجرا</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-timeline">—</div>
+          </div>
+
+          <!-- Notes -->
+          <div class="field-card" id="field-notes">
+            <div class="field-header">
+              <span class="field-title">📝 سایر یادداشت‌ها برای تیم پیگیری</span>
+              <span class="field-tag optional-tag">اختیاری</span>
+            </div>
+            <div class="field-value empty" id="val-notes">—</div>
+          </div>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="form-panel-footer">
+          <button id="showSummaryBtn" class="btn btn-outline">
+            📋 مشاهده شناسنامه کامل لید
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Final Confirmation Modal / Lead Card -->
+    <div class="modal-overlay hidden" id="confirmationModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-icon">🎯</div>
+          <div>
+            <h2>شناسنامه جامع بازدیدکننده و پروژه</h2>
+            <p class="modal-subtitle">اطلاعات هویتی و جزئیات نیازمندی‌های پروژه با موفقیت ثبت شد.</p>
+          </div>
+          <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-section-title">مشخصات تماس</div>
+          <div class="lead-summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">نام و نام خانوادگی:</span>
+              <span class="summary-value" id="sum-full_name">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">شماره تماس:</span>
+              <span class="summary-value" id="sum-phone_number">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">ایمیل:</span>
+              <span class="summary-value" id="sum-email">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">شرکت / سازمان:</span>
+              <span class="summary-value" id="sum-company_name">—</span>
+            </div>
+            <div class="summary-item full-width">
+              <span class="summary-label">سمت شغلی:</span>
+              <span class="summary-value" id="sum-job_title">—</span>
+            </div>
+          </div>
+
+          <div class="modal-section-title">نیازمندی و جزئیات پروژه</div>
+          <div class="lead-summary-grid project-summary-grid">
+            <div class="summary-item full-width">
+              <span class="summary-label">شرح پروژه / نیاز درخواستی:</span>
+              <span class="summary-value highlight-value" id="sum-project_description">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">حوزه علاقه‌مندی:</span>
+              <span class="summary-value" id="sum-field_of_interest">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">بودجه تقریبی:</span>
+              <span class="summary-value" id="sum-estimated_budget">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">بازه زمانی:</span>
+              <span class="summary-value" id="sum-timeline">—</span>
+            </div>
+            <div class="summary-item full-width">
+              <span class="summary-label">سایر نکات پیگیری:</span>
+              <span class="summary-value" id="sum-notes">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="copyLeadBtn">📋 کپی مشخصات</button>
+          <button class="btn btn-success" id="confirmLeadBtn">✅ ذخیره در سامانه غرفه</button>
+          <button class="btn btn-secondary" id="newVisitorFromModalBtn">🔄 نفر بعدی</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="ttsAudioPlayer" style="display: none;"></audio>
+  <script src="app.js"></script>
+</body>
+</html>

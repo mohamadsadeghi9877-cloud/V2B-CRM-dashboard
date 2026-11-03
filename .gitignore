@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Heavy local AI models (not needed on Render cloud CRM)
+src/ghofreyar/models/
+models/
+bin/
+
+# Temporary & system files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Keep CRM SQLite Database file tracked!
+!ghofreyar_crm.db

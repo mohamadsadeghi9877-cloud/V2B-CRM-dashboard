@@ -1,0 +1,1 @@
+from ghofreyar.config import *
