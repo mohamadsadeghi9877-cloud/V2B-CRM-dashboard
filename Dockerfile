@@ -16,8 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source code and CRM database
 COPY . .
 
-# Expose port (Render automatically provides $PORT)
+# Expose standard port
 EXPOSE 8090
 
-# Run the CRM FastAPI application
-CMD ["python", "main.py"]
+# Run with uvicorn directly listening on Render's $PORT
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8090}"]
+
