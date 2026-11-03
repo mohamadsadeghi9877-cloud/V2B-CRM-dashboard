@@ -64,8 +64,10 @@ STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @app.get("/api/state")
-def get_state(agent: BoothAgent = Depends(get_agent)):
+def get_state(agent: Any = Depends(get_agent)):
     """Return the current conversation state and form data."""
+    if not agent:
+        return {"greeting": "", "greeting_audio": "", "history": [], "form_data": {}, "is_complete": False}
     greeting = agent.get_initial_greeting()
     try:
         greeting_audio = agent.tts.synthesize_to_base64(greeting)
@@ -84,16 +86,20 @@ def get_state(agent: BoothAgent = Depends(get_agent)):
 
 
 @app.post("/api/chat")
-def chat_text(req: TextChatRequest, agent: BoothAgent = Depends(get_agent)):
+def chat_text(req: TextChatRequest, agent: Any = Depends(get_agent)):
     """Process visitor text message."""
+    if not agent:
+        raise HTTPException(status_code=503, detail="Voice agent service offline")
     result = agent.process_text(req.text)
     result.pop("audio_bytes", None)
     return result
 
 
 @app.post("/api/chat/audio")
-async def chat_audio(file: UploadFile = File(...), agent: BoothAgent = Depends(get_agent)):
+async def chat_audio(file: UploadFile = File(...), agent: Any = Depends(get_agent)):
     """Process visitor audio recording from microphone."""
+    if not agent:
+        raise HTTPException(status_code=503, detail="Voice agent service offline")
     try:
         audio_bytes = await file.read()
         if not audio_bytes:
@@ -108,8 +114,10 @@ async def chat_audio(file: UploadFile = File(...), agent: BoothAgent = Depends(g
 
 
 @app.post("/api/tts")
-def synthesize_tts(req: TTSRequest, agent: BoothAgent = Depends(get_agent)):
+def synthesize_tts(req: TTSRequest, agent: Any = Depends(get_agent)):
     """Synthesize text to speech and return base64 encoded audio."""
+    if not agent:
+        return {"audio_base64": ""}
     clean_text = (req.text or "").strip()
     if not clean_text:
         return {"audio_base64": ""}
@@ -118,14 +126,18 @@ def synthesize_tts(req: TTSRequest, agent: BoothAgent = Depends(get_agent)):
 
 
 @app.get("/api/summary")
-def get_summary(agent: BoothAgent = Depends(get_agent)):
+def get_summary(agent: Any = Depends(get_agent)):
     """Get final confirmation summary of extracted lead data."""
+    if not agent:
+        return {}
     return agent.get_summary()
 
 
 @app.post("/api/reset")
-def reset_conversation(agent: BoothAgent = Depends(get_agent)):
+def reset_conversation(agent: Any = Depends(get_agent)):
     """Reset the assistant for a new booth visitor."""
+    if not agent:
+        return {"status": "reset", "greeting": "", "form_data": {}}
     agent.reset()
     return {
         "status": "reset",
