@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastGreetingAudio = "";
 
   function renderInitialMessages(history, greetingAudio = "") {
-    messagesContainer.innerHTML = "";
+    if (messagesContainer) messagesContainer.innerHTML = "";
     totalMessages = 0;
     (history || []).forEach((msg, idx) => {
       const audioToAttach = (idx === 0 && msg.role === "assistant") ? greetingAudio : "";
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function appendMessage(role, text, isPlaying = false, audioBase64 = "") {
     if (!text) return;
     totalMessages++;
-    messageCountBadge.textContent = `${totalMessages} پیام`;
+    if (messageCountBadge) messageCountBadge.textContent = `${totalMessages} پیام`;
 
     const bubble = document.createElement("div");
     bubble.className = `message-bubble ${role}`;
@@ -117,8 +117,10 @@ document.addEventListener("DOMContentLoaded", () => {
       bubble.appendChild(audioRow);
     }
 
-    messagesContainer.appendChild(bubble);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    if (messagesContainer) {
+      messagesContainer.appendChild(bubble);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
     return bubble;
   }
@@ -145,8 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cardElement.classList.remove("filled", "highlight");
       }
     });
-    progressBarFill.style.width = "0%";
-    completionRateBadge.textContent = "0٪ تکمیل شده";
+    if (progressBarFill) progressBarFill.style.width = "0%";
+    if (completionRateBadge) completionRateBadge.textContent = "0٪ تکمیل شده";
   }
 
   function updateFormFields(formData, updatedFields = {}, forceClear = false) {
@@ -184,8 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update progress bar
     const percentage = Math.round((filledCount / formFieldIds.length) * 100);
-    progressBarFill.style.width = `${percentage}%`;
-    completionRateBadge.textContent = `${percentage}٪ تکمیل شده`;
+    if (progressBarFill) progressBarFill.style.width = `${percentage}%`;
+    if (completionRateBadge) completionRateBadge.textContent = `${percentage}٪ تکمیل شده`;
   }
 
   // Allow manual typing in form fields to update progress bar and state dynamically
@@ -205,13 +207,14 @@ document.addEventListener("DOMContentLoaded", () => {
           if (inp && inp.value.trim()) filled++;
         });
         const pct = Math.round((filled / formFieldIds.length) * 100);
-        progressBarFill.style.width = `${pct}%`;
-        completionRateBadge.textContent = `${pct}٪ تکمیل شده`;
+        if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+        if (completionRateBadge) completionRateBadge.textContent = `${pct}٪ تکمیل شده`;
       });
     }
   });
 
   function checkOffTopic(isOffTopic) {
+    if (!offTopicIndicator) return;
     if (isOffTopic) {
       offTopicIndicator.classList.remove("hidden");
     } else {
@@ -346,35 +349,38 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handle Text Submission
-  textForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = textInput.value.trim();
-    if (!text) return;
+  if (textForm) {
+    textForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!textInput) return;
+      const text = textInput.value.trim();
+      if (!text) return;
 
-    appendMessage("user", text);
-    textInput.value = "";
-    textInput.disabled = true;
-    sendBtn.disabled = true;
-    micStatusText.textContent = "در حال پردازش پاسخ دستیار...";
+      appendMessage("user", text);
+      textInput.value = "";
+      textInput.disabled = true;
+      if (sendBtn) sendBtn.disabled = true;
+      if (micStatusText) micStatusText.textContent = "در حال پردازش پاسخ دستیار...";
 
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
-      });
-      const data = await res.json();
-      handleTurnResponse(data);
-    } catch (err) {
-      console.error("Chat error:", err);
-      appendMessage("assistant", "متأسفانه مشکلی در ارتباط پیش آمد. لطفاً دوباره تلاش کنید.");
-    } finally {
-      textInput.disabled = false;
-      sendBtn.disabled = false;
-      textInput.focus();
-      micStatusText.textContent = "برای صحبت با دستیار صوتی کلیک کنید";
-    }
-  });
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        handleTurnResponse(data);
+      } catch (err) {
+        console.error("Chat error:", err);
+        appendMessage("assistant", "متأسفانه مشکلی در ارتباط پیش آمد. لطفاً دوباره تلاش کنید.");
+      } finally {
+        textInput.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+        textInput.focus();
+        if (micStatusText) micStatusText.textContent = "برای صحبت با دستیار صوتی کلیک کنید";
+      }
+    });
+  }
 
   function handleTurnResponse(data) {
     appendMessage("assistant", data.spoken_response, false, data.audio_base64 || "");
@@ -430,50 +436,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Speech Recognition API (Native Webkit/Blink Speech Recognition for 99.9% Persian Accuracy)
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition = null;
-  let speechRecognitionTranscript = "";
+  try {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let speechRecognitionTranscript = "";
 
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = "fa-IR";
-    recognition.continuous = false;
-    recognition.interimResults = true;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = "fa-IR";
+      recognition.continuous = false;
+      recognition.interimResults = true;
 
-    recognition.onresult = (event) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          speechRecognitionTranscript += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
+      recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            speechRecognitionTranscript += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
         }
-      }
-      micStatusText.textContent = speechRecognitionTranscript || interim || "در حال شنیدن گفتار شما...";
-    };
+        if (micStatusText) micStatusText.textContent = speechRecognitionTranscript || interim || "در حال شنیدن گفتار شما...";
+      };
 
-    recognition.onerror = (event) => {
-      console.warn("Browser SpeechRecognition warning:", event.error);
-    };
+      recognition.onerror = (event) => {
+        console.warn("Browser SpeechRecognition warning:", event.error);
+      };
 
-    recognition.onend = () => {
-      if (isRecording) {
-        stopRecording();
-      }
-    };
+      recognition.onend = () => {
+        if (isRecording) {
+          stopRecording();
+        }
+      };
+    }
+  } catch (e) {
+    console.warn("Speech recognition init skipped:", e);
   }
 
   let mediaRecorderInstance = null;
   let recordedAudioChunks = [];
 
   // Handle Microphone Recording
-  micBtn.addEventListener("click", async () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      await startRecording();
-    }
-  });
+  if (micBtn) {
+    micBtn.addEventListener("click", async () => {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        await startRecording();
+      }
+    });
+  }
 
   async function startRecording() {
     try {
@@ -846,9 +858,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (viewAgent) viewAgent.classList.add("hidden");
       loadCRMLeads();
       loadCRMContacts();
-    loadCRMCompanies();
-    loadCRMOpportunities();
-  });
+      loadCRMCompanies();
+      loadCRMOpportunities();
+    });
+  }
 
   // Load Contacts (Table 2)
   async function loadCRMContacts() {
