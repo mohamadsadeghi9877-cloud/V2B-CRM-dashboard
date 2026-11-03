@@ -559,11 +559,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Reset Session
-  resetBtn.addEventListener("click", async () => {
-    if (confirm("آیا مایلید اطلاعات این مشتری ریست شده و فرم برای مشتری جدید کاملاً خالی شود؟")) {
-      await performReset();
-    }
-  });
+  if (resetBtn) {
+    resetBtn.addEventListener("click", async () => {
+      if (confirm("آیا مایلید اطلاعات این مشتری ریست شده و فرم برای مشتری جدید کاملاً خالی شود؟")) {
+        await performReset();
+      }
+    });
+  }
 
   async function performReset() {
     try {
@@ -596,9 +598,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Summary Modal Logic
-  showSummaryBtn.addEventListener("click", async () => {
-    await openSummaryModal();
-  });
+  if (showSummaryBtn) {
+    showSummaryBtn.addEventListener("click", async () => {
+      await openSummaryModal();
+    });
+  }
 
   let lastFetchedSummary = null;
 
@@ -642,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setVal("sum-timeline", summary.timeline);
       setVal("sum-notes", summary.notes);
 
-      confirmationModal.classList.remove("hidden");
+      if (confirmationModal) confirmationModal.classList.remove("hidden");
     } catch (err) {
       console.error("Error fetching summary:", err);
     }
@@ -671,62 +675,68 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  closeModalBtn.addEventListener("click", () => {
-    confirmationModal.classList.add("hidden");
-  });
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", () => {
+      if (confirmationModal) confirmationModal.classList.add("hidden");
+    });
+  }
 
-  confirmLeadBtn.addEventListener("click", async () => {
-    if (!lastFetchedSummary) return;
-    try {
-      // Save directly to SQLite CRM database via Quick Capture API
-      const projectDesc = (lastFetchedSummary.project_description && lastFetchedSummary.project_description.trim()) ? lastFetchedSummary.project_description.trim() : null;
-      const payload = {
-        full_name: lastFetchedSummary.full_name || "بازدیدکننده ناشناس",
-        phone_number: lastFetchedSummary.phone_number || "ثبت‌نشده",
-        email: lastFetchedSummary.email || null,
-        company_name: lastFetchedSummary.company_name || null,
-        job_title: lastFetchedSummary.job_title || null,
-        project_title: projectDesc,
-        field_of_interest: lastFetchedSummary.field_of_interest || null,
-        estimated_budget: lastFetchedSummary.estimated_budget || null,
-        timeline: lastFetchedSummary.timeline || null,
-        notes: lastFetchedSummary.notes || null,
-        temperature: projectDesc ? "Hot" : "Warm"
-      };
+  if (confirmLeadBtn) {
+    confirmLeadBtn.addEventListener("click", async () => {
+      if (!lastFetchedSummary) return;
+      try {
+        // Save directly to SQLite CRM database via Quick Capture API
+        const projectDesc = (lastFetchedSummary.project_description && lastFetchedSummary.project_description.trim()) ? lastFetchedSummary.project_description.trim() : null;
+        const payload = {
+          full_name: lastFetchedSummary.full_name || "بازدیدکننده ناشناس",
+          phone_number: lastFetchedSummary.phone_number || "ثبت‌نشده",
+          email: lastFetchedSummary.email || null,
+          company_name: lastFetchedSummary.company_name || null,
+          job_title: lastFetchedSummary.job_title || null,
+          project_title: projectDesc,
+          field_of_interest: lastFetchedSummary.field_of_interest || null,
+          estimated_budget: lastFetchedSummary.estimated_budget || null,
+          timeline: lastFetchedSummary.timeline || null,
+          notes: lastFetchedSummary.notes || null,
+          temperature: projectDesc ? "Hot" : "Warm"
+        };
 
-      const res = await fetch("/api/crm/quick-capture", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+        const res = await fetch("/api/crm/quick-capture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      if (res.ok) {
-        if (projectDesc || payload.field_of_interest || payload.estimated_budget) {
-          alert("✅ مشخصات با موفقیت در ۴ شیت CRM (مخاطبان، شرکت‌ها، سرنخ‌ها و فرصت‌های فروش) ثبت شد!");
+        if (res.ok) {
+          if (projectDesc || payload.field_of_interest || payload.estimated_budget) {
+            alert("✅ مشخصات با موفقیت در ۴ شیت CRM (مخاطبان، شرکت‌ها، سرنخ‌ها و فرصت‌های فروش) ثبت شد!");
+          } else {
+            alert("✅ مشخصات با موفقیت در ۳ شیت CRM (مخاطبان، شرکت‌ها و سرنخ‌ها) ثبت شد.\n(با توجه به عدم ارائه درخواست مشخص، در شیت فرصت‌های فروش رکوردی ایجاد نشد.)");
+          }
+          if (confirmationModal) confirmationModal.classList.add("hidden");
+          loadCRMLeads();
+          loadCRMContacts();
+          loadCRMCompanies();
+          loadCRMOpportunities();
+          if (confirm("آیا مایلید فرم برای ثبت مشخصات مشتری بعدی خالی شود؟")) {
+            await performReset();
+          }
         } else {
-          alert("✅ مشخصات با موفقیت در ۳ شیت CRM (مخاطبان، شرکت‌ها و سرنخ‌ها) ثبت شد.\n(با توجه به عدم ارائه درخواست مشخص، در شیت فرصت‌های فروش رکوردی ایجاد نشد.)");
+          alert("خطا در ذخیره‌سازی در دیتابیس.");
         }
-        confirmationModal.classList.add("hidden");
-        loadCRMLeads();
-        loadCRMContacts();
-        loadCRMCompanies();
-        loadCRMOpportunities();
-        if (confirm("آیا مایلید فرم برای ثبت مشخصات مشتری بعدی خالی شود؟")) {
-          await performReset();
-        }
-      } else {
-        alert("خطا در ذخیره‌سازی در دیتابیس.");
+      } catch (err) {
+        console.error("Save to CRM error:", err);
+        alert("خطا در ارتباط با سرور CRM.");
       }
-    } catch (err) {
-      console.error("Save to CRM error:", err);
-      alert("خطا در ارتباط با سرور CRM.");
-    }
-  });
+    });
+  }
 
-  newVisitorFromModalBtn.addEventListener("click", async () => {
-    confirmationModal.classList.add("hidden");
-    await performReset();
-  });
+  if (newVisitorFromModalBtn) {
+    newVisitorFromModalBtn.addEventListener("click", async () => {
+      if (confirmationModal) confirmationModal.classList.add("hidden");
+      await performReset();
+    });
+  }
 
   // ==========================================
   // CRM DASHBOARD LOGIC (فاز ۳)
